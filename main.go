@@ -33,7 +33,7 @@ func main() {
 		}
 
 		i += wLength
-		//fmt.Printf("%v %% Done.\n", float64(i)/float64(srcLength)*100)
+		fmt.Printf("%v %% Done.\n", float64(i)/float64(srcLength)*100)
 	}
 
 	// scan(1, text, &dictionary)
@@ -59,7 +59,7 @@ func scan(idx int, src []rune, srcStr string) (int, string) {
 		t = string(src[idx : i+1])        //コ
 		count := strings.Count(srcStr, t) //4
 		if count > 1 || length == 1 {
-			scores = append(scores, length*count*count) //[4]
+			scores = append(scores, length*count*count*count) //[4]
 			words = append(words, t)
 			// fmt.Print(t, ":", "長", length, " 数", count, " ,  ")
 		}
@@ -68,7 +68,7 @@ func scan(idx int, src []rune, srcStr string) (int, string) {
 	// fmt.Println(scores, words)
 	// fmt.Println(words[len(scores)-1])
 
-	fmt.Println(idx, "done with", words[len(scores)-1])
+	// fmt.Println(idx, "done with", words[len(scores)-1])
 	return len(scores) - 1, words[len(scores)-1]
 
 }
