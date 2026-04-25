@@ -4,19 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 	"strings"
-	"sync"
+	"time"
 )
 
-type word struct {
-	word  string
-	count int
-}
-
 func main() {
-	// var dictionary = make(map[string]int)
-	var dictionary []string
+	var dictionary = make(map[string]struct{})
+	// var dictionary []string
 
 	src, err := os.ReadFile("testdata/wiki.txt")
 	if err != nil {
@@ -25,37 +19,35 @@ func main() {
 
 	srcStr := string(src)
 
-	text := []rune(srcStr)
+	srcRunes := []rune(srcStr)
 
-	var wg sync.WaitGroup
-	var mu sync.Mutex
+	srcLength := len(srcRunes)
 
-	srcLength := len(text)
+	s := time.Now()
 
 	for i := 0; i < srcLength; i++ {
-		wg.Add(1)
-		fmt.Println("a")
-		go func() {
-			word := scan(i, text)
-			mu.Lock()
-			if !slices.Contains(dictionary, word) {
-				dictionary = append(dictionary, word)
-			}
-			mu.Unlock()
-			wg.Done()
-		}()
+		wLength, word := scan(i, srcRunes, srcStr)
 
+		if _, ok := dictionary[word]; !ok {
+			dictionary[word] = struct{}{}
+		}
+
+		i += wLength
 		//fmt.Printf("%v %% Done.\n", float64(i)/float64(srcLength)*100)
 	}
 
 	// scan(1, text, &dictionary)
-	wg.Wait()
-	fmt.Println(dictionary)
+
+	fmt.Printf("dictionary generated: %s\n", time.Since(s))
+
+	os.WriteFile("output.txt", render(srcStr, dictionary), 0755)
+
+	fmt.Printf("rendered: %s\n", time.Since(s))
+
 }
 
-func scan(idx int, src []rune) string {
-	fmt.Println(idx, "started.")
-	srcStr := string(src)
+func scan(idx int, src []rune, srcStr string) (int, string) {
+	// fmt.Println(idx, "started.")
 	var scores []int //0
 	var words []string
 	var t string   //""
@@ -71,14 +63,40 @@ func scan(idx int, src []rune) string {
 			words = append(words, t)
 			// fmt.Print(t, ":", "長", length, " 数", count, " ,  ")
 		}
-		fmt.Println(idx, ":", length, "done.")
+		// fmt.Println(idx, ":", length, "done.")
 	}
 	// fmt.Println(scores, words)
 	// fmt.Println(words[len(scores)-1])
 
 	fmt.Println(idx, "done with", words[len(scores)-1])
-	return words[len(scores)-1]
+	return len(scores) - 1, words[len(scores)-1]
 
+}
+
+func render(src string, dictMap map[string]struct{}) []byte {
+
+	srcRunes := []rune(src)
+	var result []string
+
+	for i := 0; i < len(srcRunes); {
+		found := false
+		for length := len(srcRunes) - i; length > 0; length-- {
+			target := string(srcRunes[i : i+length])
+			if _, ok := dictMap[target]; ok {
+				result = append(result, target)
+				i += length
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			result = append(result, string(srcRunes[i]))
+			i++
+		}
+	}
+
+	return []byte(fmt.Sprint(strings.Join(result, "/")))
 }
 
 // func unique(src *[]string) {
