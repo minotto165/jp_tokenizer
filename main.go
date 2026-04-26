@@ -10,7 +10,6 @@ import (
 
 func main() {
 	var dictionary = make(map[string]struct{})
-	// var dictionary []string
 
 	src, err := os.ReadFile("testdata/wiki.txt")
 	if err != nil {
@@ -23,6 +22,8 @@ func main() {
 
 	s := time.Now()
 
+	var p float64
+
 	srcLength := len(srcRunes)
 
 	for i := 0; i < srcLength; i++ {
@@ -33,10 +34,11 @@ func main() {
 		}
 
 		i += wLength
-		fmt.Printf("%v %% Done.\n", float64(i)/float64(srcLength)*100)
-	}
 
-	// scan(10, srcRunes, srcStr)
+		p = float64(i) / float64(srcLength) * 100
+
+		fmt.Printf("%.2f %% done with %s\n", p, word)
+	}
 
 	fmt.Printf("dictionary generated: %s\n", time.Since(s))
 
@@ -48,19 +50,19 @@ func main() {
 
 func scan(idx int, src []rune, srcStr string) (int, string) {
 	// fmt.Println(idx, "started.")
-	var scores []int //0
+	var scores []int
 	var words []string
-	var t string   //""
-	var length int //0
+	var t string
+	var length int
 	found := false
 
-	for i := idx; i < len(src) && !found; i++ {
+	for i := idx; i < len(src) && !found && length < 10; i++ {
 
 		length++
-		t = string(src[idx : i+1])        //コ
-		count := strings.Count(srcStr, t) //4
+		t = string(src[idx : i+1])
+		count := strings.Count(srcStr, t)
 		if count > 1 || length == 1 {
-			scores = append(scores, length*length*length*length*length*count) //[4]
+			scores = append(scores, length*length*length*length*count)
 			words = append(words, t)
 			// fmt.Print(t, ":", "長", length, " 数", count, " ,  ")
 		} else {
@@ -68,14 +70,15 @@ func scan(idx int, src []rune, srcStr string) (int, string) {
 		}
 		// fmt.Println(idx, ":", length, "done.")
 	}
-	fmt.Println(scores, words)
+
 	maxIdx := 0
 	for i := 1; i < len(scores); i++ {
 		if scores[i] > scores[maxIdx] {
 			maxIdx = i
 		}
 	}
-	fmt.Println(idx, "done with", words[maxIdx])
+	// fmt.Println(scores, words)
+	// fmt.Println(idx, "done with", words[maxIdx])
 	return maxIdx, words[maxIdx]
 
 }
@@ -112,9 +115,3 @@ func render(src string, dictMap map[string]struct{}) []byte {
 
 	return []byte(fmt.Sprint(strings.Join(result, "/")))
 }
-
-// func unique(src *[]string) {
-// 	for i, v := range *src {
-
-// 	}
-// }
