@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -11,7 +12,7 @@ import (
 func main() {
 	var dictionary = make(map[string]struct{})
 
-	src, err := os.ReadFile("testdata/wiki.txt")
+	src, err := os.ReadFile("testdata/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -42,7 +43,8 @@ func main() {
 
 	fmt.Printf("dictionary generated: %s\n", time.Since(s))
 
-	os.WriteFile("output.txt", render(srcStr, dictionary), 0755)
+	os.WriteFile("testdata/output.txt", render(srcStr, dictionary), 0755)
+	os.WriteFile("testdata/dic.txt", dicToJson(dictionary), 0755)
 
 	fmt.Printf("rendered: %s\n", time.Since(s))
 
@@ -80,6 +82,15 @@ func scan(idx int, src []rune, srcStr string) (int, string) {
 	// fmt.Println(scores, words)
 	// fmt.Println(idx, "done with", words[maxIdx])
 	return maxIdx, words[maxIdx]
+
+}
+
+func dicToJson(dic map[string]struct{}) []byte {
+	bytes, err := json.Marshal(dic)
+	if err != nil {
+		// 握りつぶす笑
+	}
+	return bytes
 
 }
 
